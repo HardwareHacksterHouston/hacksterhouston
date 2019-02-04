@@ -6,5 +6,6 @@ run mkdir node
 workdir node
 copy package.json package.json
 run npm install --no-optional
+run npm install -g async-repl
 env NODE_PATH /node/node_modules
 cmd ["node", "/src/app.js"]
