@@ -1,23 +1,23 @@
 {
-    "name": "hacksterhouston",
-    "description": "Hackster Houston website",
-    "repository": "http://github.com/randrews/hacksterhouston",
-    "version": "1.0.0",
-    "main": "index.js",
-    "scripts": {
-	"test": "echo \"Error: no test specified\" && exit 1",
-	"build": "./build-images.sh",
-	"console": "docker exec -it hacksterhouston_express-server_1 node",
-	"redisconsole": "docker exec -it hacksterhouston_redis-server_1 redis-cli",
-	"restart": "docker-compose restart",
-	"start": "docker-compose up -d",
-	"stop": "docker-compose stop"
-    },
-    "author": "Ross Andrews",
-    "license": "ISC",
-    "dependencies": {
-	"express": "^4.16.4",
-	"redis": "^2.8.0",
-	"webpack": "^4.29.0"
-    }
+   "name": "hacksterhouston",
+   "description": "Hackster Houston website",
+   "repository": "http://github.com/randrews/hacksterhouston",
+   "version": "1.0.0",
+   "main": "index.js",
+   "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "build": "docker-compose build",
+      "console": "docker exec -it hacksterhouston_express-server_1 node",
+      "redisconsole": "docker exec -it hacksterhouston_redis-server_1 redis-cli",
+      "restart": "docker-compose restart",
+      "start": "docker-compose up -d",
+      "stop": "docker-compose stop"
+   },
+   "author": "Ross Andrews",
+   "license": "ISC",
+   "dependencies": {
+      "express": "^4.16.4",
+      "redis": "^2.8.0",
+      "webpack": "^4.29.0"
+   }
 }
