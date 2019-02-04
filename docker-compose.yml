@@ -1,0 +1,21 @@
+version: "3"
+services:
+  redis-server:
+    image: hackster-redis
+    networks:
+      - net1
+    volumes:
+      - ${PROJECT_ROOT}/data:/data
+
+  express-server:
+    image: hackster-express
+    networks:
+      - net1
+    ports:
+      - 3000:3000
+    volumes:
+      - ${PROJECT_ROOT}/src:/src
+
+networks:
+  net1:
+    driver: bridge
