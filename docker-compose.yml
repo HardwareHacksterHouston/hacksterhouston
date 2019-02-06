@@ -6,6 +6,8 @@ services:
       dockerfile: Dockerfile.redis
     networks:
       - net1
+    ports:
+      - 6379:6379
     volumes:
       - type: bind
         source: ./data
@@ -21,8 +23,8 @@ services:
       - 3000:3000
     volumes:
       - type: bind
-        source: ./src
-        target: /src
+        source: ./
+        target: /app
 
 networks:
   net1:
