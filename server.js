@@ -62,7 +62,7 @@ app.post('/login', async (request, response) => {
 
     const user = await getUser(username);
     const hasher = crypto.createHash('sha256');
-    hasher.update(`${password}${user.salt}`);
+    hasher.update(`${password}${user && user.salt}`);
     const hash = hasher.digest('hex');
 
     if (!user || !user.hash || !user.salt || hash != user.hash) {

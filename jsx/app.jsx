@@ -1,3 +1,5 @@
+const LoginContext = React.createContext(false);
+
 class Link extends React.Component {
     render() {
         return <div className="row hackster-link">
@@ -50,12 +52,7 @@ class LoginLink extends React.Component {
             const modal = <div className="modal fade" id="loginModal" tabIndex="-1" role="dialog" aria-hidden="true">
               <div className="modal-dialog" role="document">
                 <div className="modal-content">
-                  <div className="modal-body">
-                    Blah
-                  </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" onClick={() => this.login()}>Login</button>
-                  </div>
+                  <div className="modal-body">{this.errorMessage()}{this.loginForm()}</div>
                 </div>
               </div>
             </div>;
@@ -64,15 +61,45 @@ class LoginLink extends React.Component {
         }
     }
 
+    errorMessage() {
+        if (this.state.error) {
+            return <div className="alert alert-danger" role="alert">{this.state.error}</div>;
+        } else {
+            return '';
+        }
+    }
+
+    loginForm() {
+        return <form>
+          <div className="form-group">
+            <input type="text"
+                   className="form-control"
+                   id="username"
+                   placeholder="Username"
+                   onChange={e => this.setState({ username: e.target.value })} />
+          </div>
+          <div className="form-group">
+            <input type="password"
+                   className="form-control"
+                   id="password"
+                   placeholder="Password"
+                   onChange={e => this.setState({ password: e.target.value })} />
+          </div>
+          <button type="button" className="btn btn-primary" onClick={() => this.login()}>Login</button>
+        </form>;
+    }
+
     login() {
         fetch('/login', {
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: 'randrews', password: 'blah' })
+            body: JSON.stringify({ username: this.state.username, password: this.state.password })
         }).then((response) => {
             if (response.ok) {
                 $('#loginModal').modal('hide');
-                this.setState({ loggedIn: true, currentUser: 'randrews' });
+                this.setState({ loggedIn: true, currentUser: this.state.username, error: null });
+            } else {
+                response.text().then(err => this.setState({ error: err }));
             }
         });
     }
