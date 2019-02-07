@@ -1,24 +1,89 @@
 class Link extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { loginState: this.props.loginState };
-        PubSub.subscribe('loggedIn', (_, loginState) => this.setState({ loginState }));
+        this.state = { form: false };
+    }
+
+    loginState() {
+        return this.props.list.state.loginState;
     }
 
     render() {
         return <div className="row hackster-link">
           <div className="card col-md-8 offset-md-2 col-sm-12">
-            <h4 className="card-title">
-              <a href={this.props.link.url}>{this.props.link.name}</a>
-            </h4>
-            <h6 className="card-subtitle mb-2 text-muted">{this.props.link.url}</h6>
-            <p className="card-text">
-              {this.props.link.description}
-            </p>
+            {this.cardContent()}
           </div>
         </div>;
     }
+
+    cardContent() {
+        if (this.state.form) {
+            return <div className="card-text mt-2">
+              <form>
+                <div className="form-group">
+                  <input type="text"
+                         className="form-control"
+                         value={this.state.editedName}
+                         onChange={e => this.setState({ editedName: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <input type="text"
+                         className="form-control"
+                         value={this.state.editedUrl}
+                         onChange={e => this.setState({ editedUrl: e.target.value })} />
+                </div>
+                <div className="form-group">
+                  <input type="text"
+                         className="form-control"
+                         value={this.state.editedDescription}
+                         onChange={e => this.setState({ editedDescription: e.target.value })} />
+                </div>
+                <button type="button" className="btn btn-primary mr-1" onClick={() => this.saveLink()}>Save</button>
+                <button type="button" className="btn btn-secondary" onClick={() => this.setState({ form: false })}>Cancel</button>
+              </form>
+            </div>;
+        } else {
+            return <React.Fragment>
+              <h4 className="card-title">
+                {this.editLink()}
+                <a href={this.props.link.url}>{this.props.link.name}</a>
+              </h4>
+              <h6 className="card-subtitle mb-2 text-muted">{this.props.link.url}</h6>
+              <p className="card-text">
+                {this.props.link.description}
+              </p>
+            </React.Fragment>;
+        }
+    }
+
+    editLink() {
+        if (this.loginState().loggedIn) {
+            return <span className="small float-right">
+              <a href="#" className="mr-2" onClick={() => this.openForm()}>edit</a>
+              <a href="#" className="danger" onClick={() => this.deleteLink()}>delete</a>
+            </span>;
+        } else {
+            return null;
+        }
+    }
+
+    saveLink() {
+
+    }
+
+    deleteLink() {
+
+    }
+
+    openForm() {
+        this.setState({ form: true,
+                        editedName: this.props.link.name,
+                        editedUrl: this.props.link.url,
+                        editedDescription: this.props.link.description });
+    }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class LinkList extends React.Component {
     constructor(props) {
@@ -31,12 +96,14 @@ class LinkList extends React.Component {
         const links = [];
 
         this.state.links.forEach((link) => {
-            links.push(<Link link={link} key={links.length / 2 + 1}/>);
+            links.push(<Link link={link} list={this} key={links.length / 2 + 1}/>);
         });
 
         return <div>{links}</div>;
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class LoginLink extends React.Component {
     constructor(props) {
@@ -123,6 +190,8 @@ class LoginLink extends React.Component {
         })
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const linkList = ReactDOM.render(<LinkList links={[]}/>, document.getElementById('links'));
 const loginLink = ReactDOM.render(<LoginLink loginState={{}} />, document.getElementById('login_link'));
