@@ -1,6 +1,10 @@
-const LoginContext = React.createContext(false);
-
 class Link extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { loginState: this.props.loginState };
+        PubSub.subscribe('loggedIn', (_, loginState) => this.setState({ loginState }));
+    }
+
     render() {
         return <div className="row hackster-link">
           <div className="card col-md-8 offset-md-2 col-sm-12">
@@ -17,10 +21,16 @@ class Link extends React.Component {
 }
 
 class LinkList extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { loginState: {}, links: this.props.links };
+        PubSub.subscribe('loggedIn', (_, loginState) => this.setState({ loginState }));
+    }
+
     render() {
         const links = [];
 
-        this.props.links.forEach((link) => {
+        this.state.links.forEach((link) => {
             links.push(<Link link={link} key={links.length / 2 + 1}/>);
         });
 
@@ -31,16 +41,14 @@ class LinkList extends React.Component {
 class LoginLink extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            loggedIn: props.isAdmin,
-            currentUser: props.currentUser
-        };
+        this.state = { loginState: this.props.loginState };
     }
 
     render() {
-        if (this.state.loggedIn) {
+        PubSub.publish('loggedIn', this.state.loginState);
+        if (this.state.loginState.loggedIn) {
             return <a href="#" className="hackster-logout-link" onClick={() => this.logout()}>
-              Logout {this.state.currentUser}
+              Logout {this.state.loginState.currentUser}
             </a>;
         } else {
             const link = <a href="#"
@@ -97,7 +105,7 @@ class LoginLink extends React.Component {
         }).then((response) => {
             if (response.ok) {
                 $('#loginModal').modal('hide');
-                this.setState({ loggedIn: true, currentUser: this.state.username, error: null });
+                this.setState({ loginState: { loggedIn: true, currentUser: this.state.username }, error: null });
             } else {
                 response.text().then(err => this.setState({ error: err }));
             }
@@ -110,17 +118,19 @@ class LoginLink extends React.Component {
             headers: { 'Content-Type': 'application/json' }
         }).then((response) => {
             if (response.ok) {
-                this.setState({ loggedIn: false, currentUser: null });
+                this.setState({ loginState: { loggedIn: false, currentUser: null } });
             }
         })
     }
 }
 
+const linkList = ReactDOM.render(<LinkList links={[]}/>, document.getElementById('links'));
+const loginLink = ReactDOM.render(<LoginLink loginState={{}} />, document.getElementById('login_link'));
+
 fetch('/links')
     .then(response => response.json())
-    .then(links => ReactDOM.render(<LinkList links={links}/>, document.getElementById('links')));
+    .then(links => linkList.setState({ links }));
 
 fetch('/loginStatus')
     .then(response => response.json())
-    .then(status => ReactDOM.render(<LoginLink isAdmin={status.isAdmin} currentUser={status.currentUser} />,
-                                    document.getElementById('login_link')));
+    .then(status => loginLink.setState({ loginState: status }));

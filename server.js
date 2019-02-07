@@ -45,14 +45,14 @@ app.get('/links', async (request, response) => {
 
 app.get('/loginStatus', (request, response) => {
     response.send(JSON.stringify({
-        isAdmin: request.session.isAdmin,
+        loggedIn: request.session.loggedIn,
         currentUser: request.session.currentUser
     }));
 });
 
 app.post('/logout', (request, response) => {
     request.session.currentUser = null;
-    request.session.isAdmin = false;
+    request.session.loggedIn = false;
     response.status(200).send('logged out');
 });
 
@@ -67,11 +67,11 @@ app.post('/login', async (request, response) => {
 
     if (!user || !user.hash || !user.salt || hash != user.hash) {
         request.session.currentUser = null;
-        request.session.isAdmin = false;
+        request.session.loggedIn = false;
         response.status(401).send('Unable to authenticate');
     } else {
         request.session.currentUser = username;
-        request.session.isAdmin = true;
+        request.session.loggedIn = true;
         response.status(200).send(username);
     }
 });
