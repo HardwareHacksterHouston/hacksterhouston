@@ -1,7 +1,7 @@
 class Link extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { form: false, confirm: false, link: this.props.link };
+        this.state = { form: !this.props.link.id, confirm: false, link: this.props.link };
     }
 
     loginState() {
@@ -25,18 +25,21 @@ class Link extends React.Component {
                   <input type="text"
                          className="form-control"
                          value={this.state.editedName}
+                         placeholder="Name"
                          onChange={e => this.setState({ editedName: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <input type="text"
                          className="form-control"
                          value={this.state.editedUrl}
+                         placeholder="http://example.com"
                          onChange={e => this.setState({ editedUrl: e.target.value })} />
                 </div>
                 <div className="form-group">
                   <input type="text"
                          className="form-control"
                          value={this.state.editedDescription}
+                         placeholder="Description"
                          onChange={e => this.setState({ editedDescription: e.target.value })} />
                 </div>
                 <button type="button" className="btn btn-primary mr-1" onClick={() => this.saveLink()}>Save</button>
@@ -79,8 +82,10 @@ class Link extends React.Component {
               <a className="mr-2" onClick={() => this.deleteLink()}>yes</a>
               <a onClick={() => this.setState({ confirm: false })}>no</a>
             </React.Fragment>;
-        } else {
+        } else if (this.props.link.id) {
             return <a onClick={() => this.setState({ confirm: true })}>delete</a>;
+        } else {
+            return '---';
         }
     }
 
@@ -97,7 +102,7 @@ class Link extends React.Component {
 
     saveLink() {
         this.setState({ saving: true });
-        fetch('/link', {
+        fetch((this.props.link.id ? '/link' : '/create'), {
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: this.state.editedName,
@@ -140,16 +145,33 @@ class LinkList extends React.Component {
         super(props);
         this.state = { loginState: {}, links: this.props.links };
         PubSub.subscribe('loggedIn', (_, loginState) => this.setState({ loginState }));
+        this.newCount = 0;
     }
 
     render() {
         const links = [];
 
         this.state.links.forEach((link) => {
-            links.push(<Link link={link} list={this} key={link.id}/>);
+            links.push(<Link link={link} list={this} key={link.id || link.newCount}/>);
         });
 
-        return <div>{links}</div>;
+        return <div>{links}{this.createControl()}</div>;
+    }
+
+    createControl() {
+        if (this.state.loginState.loggedIn) {
+            return <div className="row hackster-link mb-4">
+              <div className="card col-md-8 offset-md-2 col-sm-12">
+                <p className="card-text text-center">
+                  <a onClick={() => this.createLink()}>Add new link</a>
+                </p>
+              </div>
+            </div>;
+        }
+    }
+
+    createLink() {
+        this.setState({ links: this.state.links.concat([{ newCount: `new-${++this.newCount}` }]) });
     }
 }
 
