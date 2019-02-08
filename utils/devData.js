@@ -1,16 +1,20 @@
 const faker = require('faker');
-const Redis = require('redis');
+const RedisWrapper = require('../redisWrapper');
 
-const redis = Redis.createClient({ host: 'redis-server' });
-
-const fakeUrl = () => ({
+const fakeUrl = (id) => ({
     url: faker.internet.url(),
     name: faker.company.catchPhrase(),
-    description: faker.hacker.phrase()
+    description: faker.hacker.phrase(),
+    id
 });
 
-const addFake = () => new Promise(resolve => redis.rpush('links', JSON.stringify(fakeUrl()), resolve));
-const delList = () => new Promise(resolve => redis.del('links', resolve));
+const addFake = (id) => RedisWrapper.saveLink(fakeUrl(id));
+const delList = async () => {
+    const keys = await RedisWrapper.keys('link:*');
+    if (keys.length > 0) {
+        return redisWrapper.del(keys);
+    }
+}
 
 const setFakes = async (count) => {
     await delList();

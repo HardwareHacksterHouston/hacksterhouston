@@ -1,7 +1,7 @@
 class Link extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { form: false };
+        this.state = { form: false, confirm: false, link: this.props.link };
     }
 
     loginState() {
@@ -9,8 +9,9 @@ class Link extends React.Component {
     }
 
     render() {
-        return <div className="row hackster-link">
+        return <div className="row hackster-link mb-4">
           <div className="card col-md-8 offset-md-2 col-sm-12">
+            {this.errorMessage()}
             {this.cardContent()}
           </div>
         </div>;
@@ -39,28 +40,55 @@ class Link extends React.Component {
                          onChange={e => this.setState({ editedDescription: e.target.value })} />
                 </div>
                 <button type="button" className="btn btn-primary mr-1" onClick={() => this.saveLink()}>Save</button>
-                <button type="button" className="btn btn-secondary" onClick={() => this.setState({ form: false })}>Cancel</button>
+                <button type="button" className="btn btn-secondary" onClick={() => this.setState({ form: false, error: null })}>Cancel</button>
+                {this.savingIndicator()}
               </form>
             </div>;
         } else {
             return <React.Fragment>
               <h4 className="card-title">
                 {this.editLink()}
-                <a href={this.props.link.url}>{this.props.link.name}</a>
+                <a href={this.state.link.url}>{this.state.link.name}</a>
               </h4>
-              <h6 className="card-subtitle mb-2 text-muted">{this.props.link.url}</h6>
+              <h6 className="card-subtitle mb-2 text-muted">{this.state.link.url}</h6>
               <p className="card-text">
-                {this.props.link.description}
+                {this.state.link.description}
               </p>
             </React.Fragment>;
+        }
+    }
+
+    savingIndicator() {
+        if (this.state.saving) {
+            return <span className="float-right">Saving...</span>;
+        }
+    }
+
+    errorMessage() {
+        if (this.state.error) {
+            return <div className="alert alert-danger mt-2" role="alert">{this.state.error}</div>;
+        }
+    }
+
+    deleteControl() {
+        if (this.state.deleting) {
+            return 'deleting...';
+        } else if (this.state.confirm) {
+            return <React.Fragment>
+              <span className="mr-2">are you sure?</span>
+              <a className="mr-2" onClick={() => this.deleteLink()}>yes</a>
+              <a onClick={() => this.setState({ confirm: false })}>no</a>
+            </React.Fragment>;
+        } else {
+            return <a onClick={() => this.setState({ confirm: true })}>delete</a>;
         }
     }
 
     editLink() {
         if (this.loginState().loggedIn) {
             return <span className="small float-right">
-              <a href="#" className="mr-2" onClick={() => this.openForm()}>edit</a>
-              <a href="#" className="danger" onClick={() => this.deleteLink()}>delete</a>
+              <a onClick={() => this.openForm()}>edit</a>&nbsp;|&nbsp;
+                   {this.deleteControl()}
             </span>;
         } else {
             return null;
@@ -68,11 +96,33 @@ class Link extends React.Component {
     }
 
     saveLink() {
-
+        this.setState({ saving: true });
+        fetch('/link', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: this.state.editedName,
+                                   url: this.state.editedUrl,
+                                   description: this.state.editedDescription,
+                                   id: this.props.link.id })
+        }).then((response) => {
+            if (response.ok) {
+                response.json().then((link) => this.setState({ link }));
+                this.setState({ saving: false, error: null, form: false });
+            } else {
+                response.text().then(err => this.setState({ saving: false, error: err }));
+            }
+        });
     }
 
     deleteLink() {
-
+        this.setState({ deleting: true });
+        fetch(`/delete/${this.state.link.id}`, { method: 'post' }).then((response) => {
+            if (response.ok) {
+                populateLinks();
+            } else {
+                response.text().then(err => this.setState({ deleting: false, confirm: false, error: err }));
+            }
+        });
     }
 
     openForm() {
@@ -96,7 +146,7 @@ class LinkList extends React.Component {
         const links = [];
 
         this.state.links.forEach((link) => {
-            links.push(<Link link={link} list={this} key={links.length / 2 + 1}/>);
+            links.push(<Link link={link} list={this} key={link.id}/>);
         });
 
         return <div>{links}</div>;
@@ -119,7 +169,7 @@ class LoginLink extends React.Component {
             </a>;
         } else {
             const link = <a href="#"
-                            className="hackster-login-link"
+                            className="hackster-login-link mt-2"
                             onClick={() => $('#loginModal').modal()}>
               Login
             </a>;
@@ -139,8 +189,6 @@ class LoginLink extends React.Component {
     errorMessage() {
         if (this.state.error) {
             return <div className="alert alert-danger" role="alert">{this.state.error}</div>;
-        } else {
-            return '';
         }
     }
 
@@ -196,9 +244,11 @@ class LoginLink extends React.Component {
 const linkList = ReactDOM.render(<LinkList links={[]}/>, document.getElementById('links'));
 const loginLink = ReactDOM.render(<LoginLink loginState={{}} />, document.getElementById('login_link'));
 
-fetch('/links')
+const populateLinks = () => fetch('/links')
     .then(response => response.json())
     .then(links => linkList.setState({ links }));
+
+populateLinks();
 
 fetch('/loginStatus')
     .then(response => response.json())

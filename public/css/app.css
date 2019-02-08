@@ -20,10 +20,6 @@ body.hackster {
     color: white;
 }
 
-.hackster-link {
-    margin-top: 30px;
-}
-
 .hackster-logout-link, .hackster-login-link {
     float: right;
     color: #999;

@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const Redis = require('redis');
+const RedisWrapper = require('./redisWrapper');
 const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -7,16 +7,6 @@ const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 
 const app = express();
-
-const redis = Redis.createClient({ host: 'redis-server' });
-const numLinks = () => new Promise(resolve => redis.llen('links', (err, num) => resolve(num)));
-const getLinks = (max) => new Promise(async (resolve) => {
-    const max = await numLinks();
-    redis.lrange('links', 0, max, (err, links) => {
-	resolve(_.map(links, JSON.parse));
-    });
-});
-const getUser = (username) => new Promise(resolve => redis.get(`admin:${username}`, (err, json) => resolve(JSON.parse(json))));
 
 app.use('/', express.static('/app/public', { setHeaders: (res, path) => {
     if(path.endsWith('.css')) { res.setHeader('Content-Type', 'text/css'); }
@@ -38,7 +28,7 @@ app.use(/\/log.*|\/links/, (req, res, next) => {
 app.get('/links', async (request, response) => {
     if (request.session.views) request.session.views++;
     else request.session.views = 1;
-    const links = await getLinks();
+    const links = await RedisWrapper.getLinks();
 
     response.send(JSON.stringify(links));
 });
@@ -60,7 +50,7 @@ app.post('/login', async (request, response) => {
     const username = request.body.username;
     const password = request.body.password;
 
-    const user = await getUser(username);
+    const user = await RedisWrapper.getUser(username);
     const hasher = crypto.createHash('sha256');
     hasher.update(`${password}${user && user.salt}`);
     const hash = hasher.digest('hex');
@@ -73,6 +63,38 @@ app.post('/login', async (request, response) => {
         request.session.currentUser = username;
         request.session.loggedIn = true;
         response.status(200).send(username);
+    }
+});
+
+app.post('/link', async (request, response) => {
+    if (request.session.loggedIn) {
+        const newLink = request.body;
+        const oldLink = await RedisWrapper.getLink(newLink.id);
+
+        if (oldLink) {
+            RedisWrapper.saveLink(newLink);
+            response.status(200).send(newLink);
+        } else {
+            response.status(404).send(`Couldn't find link ${newLink.id}`);
+        }
+    } else {
+        response.status(401).send('Not logged in');
+    }
+
+});
+
+app.post('/delete/:id', async (request, response) => {
+    if (request.session.loggedIn) {
+        const oldLink = await RedisWrapper.getLink(request.params.id);
+
+        if (oldLink) {
+            RedisWrapper.deleteLink(oldLink.id);
+            response.status(200).send('Deleted');
+        } else {
+            response.status(404).send(`Couldn't find link ${newLink.id}`);
+        }
+    } else {
+        response.status(401).send('Not logged in');
     }
 });
 
