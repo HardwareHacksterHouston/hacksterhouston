@@ -1,12 +1,14 @@
 import '@babel/polyfill';
 import { LinkList } from './linkList.jsx';
-import { LoginLink } from './loginLink.jsx';
+import { LoginController } from './loginController.jsx';
+import { postJson } from './utils.jsx';
 
 class Controller extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { links: [], loginState: {} };
+        this.state = { links: [] };
         this.fetchLinks();
+        this.fetchLogin();
     }
 
     fetchLinks() {
@@ -18,32 +20,16 @@ class Controller extends React.Component {
     fetchLogin() {
         fetch('/loginStatus')
             .then(response => response.json())
-            .then(status => this.setState({ loginState: status }));
-    }
-
-    async postJson(path, obj) {
-        const response = await fetch(path, {
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(obj)
-        });
-        const text = await response.text();
-
-        if (response.ok) {
-            return text;
-        } else {
-            throw text;
-        }
-    }
-
-    login(username, password) {
-        return this.postJson('/login', { username, password });
+            .then(({ loggedIn, currentUser }) => this.setState({ loggedIn, currentUser }));
     }
 
     render() {
+        //<LinkList links={this.state.links} controller={this}/>
         return <React.Fragment>
-          <LinkList links={this.state.links} controller={this}/>
-          <LoginLink loginState={this.state.loginState} controller={this} />
+          <LoginController
+              controller={this}
+              loggedIn={this.state.loggedIn}
+              currentUser={this.state.currentUser}/>
         </React.Fragment>;
     }
 }
