@@ -23,9 +23,32 @@ class Controller extends React.Component {
             .then(({ loggedIn, currentUser }) => this.setState({ loggedIn, currentUser }));
     }
 
+    setLink(id, link) {
+        const index = this.state.links.findIndex(ln => ln.id == id);
+        const links = this.state.links;
+        links[index] = link;
+        this.setState({ links });
+    }
+
+    removeLink(id) {
+        const index = this.state.links.findIndex(ln => ln.id == id);
+        const links = this.state.links;
+        links.splice(index, 1);
+        this.setState({ links });        
+    }
+
+    insertLink(link) {
+        const links = this.state.links;
+        links.push(link);
+        this.setState({ links });
+    }
+
     render() {
-        //<LinkList links={this.state.links} controller={this}/>
         return <React.Fragment>
+          <LinkList
+              loggedIn={this.state.loggedIn}
+              links={this.state.links}
+              controller={this}/>
           <LoginController
               controller={this}
               loggedIn={this.state.loggedIn}

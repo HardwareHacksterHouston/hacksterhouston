@@ -1,11 +1,10 @@
+import { LinkForm } from './linkForm.jsx';
+import { postJson } from './utils.jsx';
+
 class Link extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { form: !this.props.link.id, confirm: false, link: this.props.link };
-    }
-
-    loginState() {
-        return this.props.list.state.loginState;
+        this.state = { form: false, confirm: false };
     }
 
     render() {
@@ -19,51 +18,18 @@ class Link extends React.Component {
 
     cardContent() {
         if (this.state.form) {
-            return <div className="card-text mt-2">
-              <form>
-                <div className="form-group">
-                  <input type="text"
-                         className="form-control"
-                         value={this.state.editedName}
-                         placeholder="Name"
-                         onChange={e => this.setState({ editedName: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <input type="text"
-                         className="form-control"
-                         value={this.state.editedUrl}
-                         placeholder="http://example.com"
-                         onChange={e => this.setState({ editedUrl: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <input type="text"
-                         className="form-control"
-                         value={this.state.editedDescription}
-                         placeholder="Description"
-                         onChange={e => this.setState({ editedDescription: e.target.value })} />
-                </div>
-                <button type="button" className="btn btn-primary mr-1" onClick={() => this.saveLink()}>Save</button>
-                <button type="button" className="btn btn-secondary" onClick={() => this.setState({ form: false, error: null })}>Cancel</button>
-                {this.savingIndicator()}
-              </form>
-            </div>;
+            return <LinkForm delegate={this} link={this.props.link} saving={this.state.saving} />;
         } else {
             return <React.Fragment>
               <h4 className="card-title">
                 {this.editLink()}
-                <a href={this.state.link.url}>{this.state.link.name}</a>
+                <a href={this.props.link.url}>{this.props.link.name}</a>
               </h4>
-              <h6 className="card-subtitle mb-2 text-muted">{this.state.link.url}</h6>
+              <h6 className="card-subtitle mb-2 text-muted">{this.props.link.url}</h6>
               <p className="card-text">
-                {this.state.link.description}
+                {this.props.link.description}
               </p>
             </React.Fragment>;
-        }
-    }
-
-    savingIndicator() {
-        if (this.state.saving) {
-            return <span className="float-right">Saving...</span>;
         }
     }
 
@@ -82,15 +48,13 @@ class Link extends React.Component {
               <a className="mr-2" onClick={() => this.deleteLink()}>yes</a>
               <a onClick={() => this.setState({ confirm: false })}>no</a>
             </React.Fragment>;
-        } else if (this.props.link.id) {
-            return <a onClick={() => this.setState({ confirm: true })}>delete</a>;
         } else {
-            return '---';
+            return <a onClick={() => this.setState({ confirm: true })}>delete</a>;
         }
     }
 
     editLink() {
-        if (this.loginState().loggedIn) {
+        if (this.props.editable) {
             return <span className="small float-right">
               <a onClick={() => this.openForm()}>edit</a>&nbsp;|&nbsp;
                    {this.deleteControl()}
@@ -100,41 +64,31 @@ class Link extends React.Component {
         }
     }
 
-    saveLink() {
+    async save(link) {
         this.setState({ saving: true });
-        fetch((this.props.link.id ? '/link' : '/create'), {
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: this.state.editedName,
-                                   url: this.state.editedUrl,
-                                   description: this.state.editedDescription,
-                                   id: this.props.link.id })
-        }).then((response) => {
-            if (response.ok) {
-                response.json().then((link) => this.setState({ link }));
-                this.setState({ saving: false, error: null, form: false });
-            } else {
-                response.text().then(err => this.setState({ saving: false, error: err }));
-            }
-        });
+        try {
+            const newLink = JSON.parse(await postJson('/link', link));
+            this.props.controller.setLink(this.props.link.id, newLink);
+            this.setState({ error: null, form: false });
+        } catch(err) {
+            this.setState({ error: err });
+        }
+        this.setState({ saving: false });
     }
 
-    deleteLink() {
+    async deleteLink() {
         this.setState({ deleting: true });
-        fetch(`/delete/${this.state.link.id}`, { method: 'post' }).then((response) => {
-            if (response.ok) {
-                populateLinks();
-            } else {
-                response.text().then(err => this.setState({ deleting: false, confirm: false, error: err }));
-            }
-        });
+        const response = await fetch(`/delete/${this.props.link.id}`, { method: 'post' });
+        if (response.ok) {
+            this.props.controller.removeLink(this.props.link.id);
+        } else {
+            const err = await response.text();
+            this.setState({ deleting: false, confirm: false, error: err });
+        }
     }
 
     openForm() {
-        this.setState({ form: true,
-                        editedName: this.props.link.name,
-                        editedUrl: this.props.link.url,
-                        editedDescription: this.props.link.description });
+        this.setState({ form: true });
     }
 }
 
