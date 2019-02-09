@@ -1,6 +1,6 @@
 class LoginModal extends React.Component {
     constructor(props) {
-        super(props);
+        super(props); // error and controller
         this.state = {};
     }
 

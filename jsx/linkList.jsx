@@ -3,7 +3,7 @@ import { NewLink } from './newLink.jsx';
 
 class LinkList extends React.Component {
     constructor(props) {
-        super(props);
+        super(props); // controller, links, loggedIn
         this.state = { loginState: {} };
     }
 
@@ -37,6 +37,10 @@ class LinkList extends React.Component {
               </div>
             </div>;
         }
+    }
+
+    closeForm() {
+        this.setState({ newForm: false });
     }
 }
 

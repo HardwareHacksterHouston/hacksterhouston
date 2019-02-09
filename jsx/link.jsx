@@ -3,8 +3,14 @@ import { postJson } from './utils.jsx';
 
 class Link extends React.Component {
     constructor(props) {
-        super(props);
-        this.state = { form: false, confirm: false };
+        super(props); // link, controller, editable
+        this.state = {
+            form: false, // Whether to show an edit form
+            confirm: false, // Are we trying to confirm a delete?
+            saving: false, // Waiting for a server response from a save
+            deleting: false, // Waiting for a server response from a delete
+            error: null // Error message from the last server response
+        };
     }
 
     render() {
@@ -89,6 +95,10 @@ class Link extends React.Component {
 
     openForm() {
         this.setState({ form: true });
+    }
+
+    closeForm() {
+        this.setState({ form: false, error: null });
     }
 }
 

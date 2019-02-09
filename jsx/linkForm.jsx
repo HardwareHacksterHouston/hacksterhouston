@@ -1,8 +1,11 @@
 class LinkForm extends React.Component {
     constructor(props) {
+        // saving, delegate, link (optional)
+        // saving is whether we're waiting for a server response
+        // delegate should have a closeForm and a save
+        // link is the initial state of the form
         super(props);
-        this.delegate = props.delegate;
-        this.state = props.link;
+        this.state = props.link || {}; // name, url, and description
     }
 
     render() {
@@ -29,15 +32,11 @@ class LinkForm extends React.Component {
                      placeholder="Description"
                      onChange={e => this.setState({ description: e.target.value })} />
             </div>
-            <button type="button" className="btn btn-primary mr-1" onClick={() => this.saveLink()}>Save</button>
-            <button type="button" className="btn btn-secondary" onClick={() => this.setState({ form: false, error: null })}>Cancel</button>
+            <button type="button" className="btn btn-primary mr-1" onClick={() => this.props.delegate.save(this.state)}>Save</button>
+            <button type="button" className="btn btn-secondary" onClick={() => this.props.delegate.closeForm()}>Cancel</button>
             {this.savingIndicator()}
           </form>
         </div>;
-    }
-
-    saveLink() {
-        this.delegate.save(this.state);
     }
 
     savingIndicator() {

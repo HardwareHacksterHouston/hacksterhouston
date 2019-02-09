@@ -4,8 +4,8 @@ import { postJson } from './utils.jsx';
 
 class LoginController extends React.Component {
     constructor(props) {
-        super(props);
-        this.state = {};
+        super(props); // controller, loggedIn, currentUser
+        this.state = { error: null };
     }
 
     render() {
@@ -24,7 +24,7 @@ class LoginController extends React.Component {
             await postJson('/login', { username, password });
             $('#loginModal').modal('hide');
             this.setState({ error: null });
-            this.props.controller.setState({ loggedIn: true, currentUser: username });
+            this.props.controller.loggedIn(username);
         } catch (err) {
             this.setState({ error: err });
         }
@@ -32,7 +32,7 @@ class LoginController extends React.Component {
 
     async logout() {
         await postJson('/logout', {});
-        this.props.controller.setState({ loggedIn: false });
+        this.props.controller.loggedOut();
     }
 
     openModal() {

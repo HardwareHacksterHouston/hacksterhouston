@@ -6,7 +6,11 @@ import { postJson } from './utils.jsx';
 class Controller extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { links: [] };
+        this.state = {
+            links: [],
+            loggedIn: false,
+            currentUser: null
+        };
         this.fetchLinks();
         this.fetchLogin();
     }
@@ -21,6 +25,14 @@ class Controller extends React.Component {
         fetch('/loginStatus')
             .then(response => response.json())
             .then(({ loggedIn, currentUser }) => this.setState({ loggedIn, currentUser }));
+    }
+
+    loggedIn(username) {
+        this.setState({ loggedIn: true, currentUser: username });
+    }
+
+    loggedOut() {
+        this.setState({ loggedIn: false });
     }
 
     setLink(id, link) {

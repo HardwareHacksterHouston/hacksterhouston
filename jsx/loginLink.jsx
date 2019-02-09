@@ -1,11 +1,9 @@
 class LoginLink extends React.Component {
     constructor(props) {
-        super(props);
-        this.state = {};
+        super(props); // controller, loggedIn, username
     }
 
     render() {
-        PubSub.publish('loggedIn', this.state.loginState);
         if (this.props.loggedIn === "true") {
             return <a href="#" className="hackster-logout-link" onClick={() => this.props.controller.logout()}>
               Logout {this.props.username}

@@ -3,15 +3,15 @@ import { postJson } from './utils.jsx';
 
 class NewLink extends React.Component {
     constructor(props) {
-        super(props);
-        this.state = { saving: false, link: {} };
+        super(props); // controller and list
+        this.state = { saving: false };
     }
 
     render() {
         return <div className="row hackster-link mb-4">
           <div className="card col-md-8 offset-md-2 col-sm-12">
             {this.errorMessage()}
-            <LinkForm delegate={this} link={this.state.link} saving={this.state.saving} />
+            <LinkForm delegate={this} link={{}} saving={this.state.saving} />
           </div>
         </div>;
     }
@@ -27,10 +27,14 @@ class NewLink extends React.Component {
         try {
             const newLink = JSON.parse(await postJson('/create', link));
             this.props.controller.insertLink(newLink);
-            this.props.list.setState({ newForm: false });
+            this.props.list.closeForm();
         } catch(err) {
             this.setState({ error: err });
         }
+    }
+
+    closeForm() {
+        this.props.list.closeForm();
     }
 }
 
