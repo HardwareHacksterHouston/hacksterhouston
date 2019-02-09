@@ -1,0 +1,26 @@
+.hackster h1, .hackster p.lead {
+    color: white;
+    text-align: center;
+}
+
+body.hackster {
+    background-image: url(hero.7f495077.png);
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-color: #222222;
+    background-attachment: fixed;
+}
+
+.hackster .card {
+    background-color: #666666;
+    color: #cccccc;
+}
+
+.hackster .card a {
+    color: white;
+}
+
+.hackster-logout-link, .hackster-login-link {
+    float: right;
+    color: #999;
+}

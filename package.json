@@ -7,7 +7,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "docker-compose build",
-        "buildjs": "babel jsx --out-dir public/js --source-maps",
+        "webpack": "webpack",
         "console": "docker exec -itw /app hacksterhouston_express-server_1 async-repl",
         "bash": "docker exec -it hacksterhouston_express-server_1 bash",
         "redisconsole": "docker exec -it hacksterhouston_redis-server_1 redis-cli",
@@ -18,20 +18,29 @@
     "author": "Ross Andrews",
     "license": "ISC",
     "dependencies": {
-        "babel-cli": "^6.26.0",
-        "babel-preset-react": "^6.24.1",
+        "@babel/core": "^7.2.2",
+        "@babel/polyfill": "^7.2.5",
+        "@babel/preset-env": "^7.3.1",
+        "@babel/preset-react": "^7.0.0",
+        "babel-loader": "^8.0.5",
         "body-parser": "^1.18.3",
         "connect-redis": "^3.4.0",
         "express": "^4.16.4",
         "express-session": "^1.15.6",
         "faker": "^4.1.0",
+        "jsx": "^0.9.89",
         "lodash": "^4.17.11",
         "redis": "^2.8.0",
+        "webpack": "^4.29.3",
         "yargs": "^12.0.5"
     },
     "babel": {
         "presets": [
-            "react"
+            "@babel/env",
+            "@babel/react"
         ]
+    },
+    "devDependencies": {
+        "webpack-cli": "^3.2.3"
     }
 }
