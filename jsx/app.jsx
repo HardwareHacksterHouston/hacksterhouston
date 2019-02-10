@@ -1,7 +1,7 @@
 import '@babel/polyfill';
 import { LinkList } from './linkList.jsx';
 import { LoginController } from './loginController.jsx';
-import { postJson } from './utils.jsx';
+import { postJson, getJson } from './utils.jsx';
 
 class Controller extends React.Component {
     constructor(props) {
@@ -15,16 +15,14 @@ class Controller extends React.Component {
         this.fetchLogin();
     }
 
-    fetchLinks() {
-        fetch('/links')
-            .then(response => response.json())
-            .then(links => this.setState({ links }));
+    async fetchLinks() {
+        const links = await getJson('/links');
+        this.setState({ links });
     }
 
-    fetchLogin() {
-        fetch('/loginStatus')
-            .then(response => response.json())
-            .then(({ loggedIn, currentUser }) => this.setState({ loggedIn, currentUser }));
+    async fetchLogin() {
+        const { loggedIn, currentUser } = await getJson('/loginStatus');
+        this.setState({ loggedIn, currentUser });
     }
 
     loggedIn(username) {

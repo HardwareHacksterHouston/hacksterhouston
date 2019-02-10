@@ -29,8 +29,8 @@ app.get('/links', async (request, response) => {
     if (request.session.views) request.session.views++;
     else request.session.views = 1;
     const links = await RedisWrapper.getLinks();
-
-    response.send(JSON.stringify(links));
+    const sortedLinks = links.sort((a, b) => a.sortOrder > b.sortOrder);
+    response.send(JSON.stringify(sortedLinks));
 });
 
 app.get('/loginStatus', (request, response) => {

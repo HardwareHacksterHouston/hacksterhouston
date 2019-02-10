@@ -27,4 +27,14 @@ const setFakes = async (count) => {
     await Promise.all(promises);
 };
 
-module.exports = { setFakes };
+
+const addSorts = async () => {
+    const links = await RedisWrapper.getLinks();
+    let sort = 0;
+    links.forEach(async (link) => {
+        link.sortOrder = ++sort;
+        await RedisWrapper.saveLink(link);
+    });
+};
+
+module.exports = { setFakes, addSorts };

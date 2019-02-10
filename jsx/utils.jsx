@@ -13,4 +13,9 @@ const postJson = async (path, obj) => {
     }
 };
 
-export { postJson };
+const getJson = async (path) => {
+    const response = await fetch(path);
+    return response.json();
+};
+
+export { postJson, getJson };
