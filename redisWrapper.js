@@ -29,4 +29,9 @@ methods.saveLink = (link) => methods.set(`link:${link.id}`, JSON.stringify(link)
 
 methods.deleteLink = (id) => methods.del(`link:${id}`);
 
+methods.nextSortOrder = async () => {
+    const links = await methods.getLinks();
+    return Math.max.apply(null, _.map(links, ln => ln.sortOrder)) + 1;
+};
+
 module.exports = methods;

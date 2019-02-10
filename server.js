@@ -107,6 +107,7 @@ app.post('/create', async (req, res) => {
         } else {
             newLink.id = 1;
         }
+        newLink.sortOrder = await RedisWrapper.nextSortOrder();
         await RedisWrapper.saveLink(newLink);
         res.status(200).send(JSON.stringify(newLink));
     } else {
