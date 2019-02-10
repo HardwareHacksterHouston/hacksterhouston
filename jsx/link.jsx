@@ -3,7 +3,7 @@ import { postJson } from './utils.jsx';
 
 class Link extends React.Component {
     constructor(props) {
-        super(props); // link, controller, editable
+        super(props); // link, controller, editable, first, last
         this.state = {
             form: false, // Whether to show an edit form
             confirm: false, // Are we trying to confirm a delete?
@@ -50,21 +50,33 @@ class Link extends React.Component {
             return 'deleting...';
         } else if (this.state.confirm) {
             return <React.Fragment>
-              <span className="mr-2">are you sure?</span>
-              <a className="mr-2" onClick={() => this.deleteLink()}>yes</a>
-              <a onClick={() => this.setState({ confirm: false })}>no</a>
+              <span key="s4" className="mr-2">are you sure?</span>
+              <a key="d2" className="mr-2" onClick={() => this.deleteLink()}>yes</a>
+              <a key="d3" onClick={() => this.setState({ confirm: false })}>no</a>
             </React.Fragment>;
         } else {
-            return <a onClick={() => this.setState({ confirm: true })}>delete</a>;
+            return <a key="d1" onClick={() => this.setState({ confirm: true })}>delete</a>;
         }
     }
 
     editLink() {
         if (this.props.editable) {
-            return <span className="small float-right">
-              <a onClick={() => this.openForm()}>edit</a>&nbsp;|&nbsp;
-                   {this.deleteControl()}
-            </span>;
+            const controls = [];
+            controls.push(<a key="1" onClick={() => this.openForm()}>edit</a>);
+            controls.push(<span key="s1">&nbsp;|&nbsp;</span>);
+            controls.push(this.deleteControl());
+
+            if(!this.props.first) {
+                controls.push(<span key="s2">&nbsp;|&nbsp;</span>);
+                controls.push(<a key="2" onClick={() => this.props.controller.move(this.props.link.id, 'up')}>up</a>);
+            }
+
+            if(!this.props.last) {
+                controls.push(<span key="s3">&nbsp;|&nbsp;</span>);
+                controls.push(<a key="3" onClick={() => this.props.controller.move(this.props.link.id, 'down')}>down</a>);
+            }
+            
+            return <span className="small float-right">{controls}</span>;
         } else {
             return null;
         }

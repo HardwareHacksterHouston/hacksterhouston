@@ -9,12 +9,15 @@ class LinkList extends React.Component {
 
     render() {
         const links = [];
-        let newCount = 0;
+        const firstLinkId = this.props.links.length > 0 ? this.props.links[0].id : null;
+        const lastLinkId = this.props.links.length > 0 ? this.props.links[this.props.links.length - 1].id : 0;
 
         this.props.links.forEach((link) => {
             links.push(<Link
                            link={link}
-                           key={link.new ? `new-${++newCount}`: link.id}
+                           key={link.id}
+                           first={link.id === firstLinkId}
+                           last={link.id === lastLinkId}
                            controller={this.props.controller}
                            editable={this.props.loggedIn}/>);
         });

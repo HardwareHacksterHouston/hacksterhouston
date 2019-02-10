@@ -115,6 +115,17 @@ app.post('/create', async (req, res) => {
     }
 });
 
+app.post('/setSortOrder', async (req, res) => {
+    if (req.session.loggedIn) {
+        const newOrder = req.body.order;
+        let sortOrder = 0;
+        await Promise.all(newOrder.map(id => RedisWrapper.updateSortOrder(id, ++sortOrder)));
+        res.status(200).send('updated');
+    } else {
+        res.status(401).send('Not logged in');
+    }
+});
+
 process.on('SIGTERM', () => app.close(() => process.exit(0)));
 
 app.listen(3000);

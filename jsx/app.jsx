@@ -53,6 +53,23 @@ class Controller extends React.Component {
         this.setState({ links });
     }
 
+    move(id, direction) {
+        const links = this.state.links;
+        const startIdx = links.findIndex(link => link.id === id);
+        const link = links.splice(startIdx, 1);
+        let newLinks = null
+        if (direction === 'up') {
+            const left = links.splice(0, startIdx-1);
+            newLinks = left.concat(link).concat(links);
+        } else if (direction === 'down') {
+            const left = links.splice(0, startIdx+1);
+            newLinks = left.concat(link).concat(links);
+        }
+        this.setState({ links: newLinks });
+        const newOrder = newLinks.map(link => link.id);
+        postJson('/setSortOrder', { order: newOrder });
+    }
+
     render() {
         return <React.Fragment>
           <LinkList

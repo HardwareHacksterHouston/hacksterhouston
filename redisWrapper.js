@@ -34,4 +34,10 @@ methods.nextSortOrder = async () => {
     return Math.max.apply(null, _.map(links, ln => ln.sortOrder)) + 1;
 };
 
+methods.updateSortOrder = async (id, newSortOrder) => {
+    const link = await methods.getLink(id);
+    link.sortOrder = newSortOrder;
+    return methods.saveLink(link);
+};
+
 module.exports = methods;
